@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Summarization API Playground</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header>
+    <h1>Summarization API Playground</h1>
+  </header>
+  <main>
+    <fieldset>
+      <legend>Prompt</legend>
+      <!-- Added some placeholder text to make testing easier -->
+      <textarea id="input" placeholder="Enter text to summarize here...">
+The Summarization API allows you to generate summaries of text content using a built-in AI model. This is particularly useful for distilling long articles, chat logs, or documents into concise versions directly within the browser, preserving user privacy by keeping data local.
+          </textarea>
+      <div>Token Usage: <span id="character-count">0 of 0</span></div>
+    </fieldset>
+
+    <fieldset class="controls">
+      <legend>Settings</legend>
+      <div class="control-group">
+        <label for="type">Summary Type:</label>
+        <select id="type">
+          <option value="key-points" selected>Key Points</option>
+          <option value="tldr">TL;DR</option>
+          <option value="teaser">Teaser</option>
+          <option value="headline">Headline</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="length">Length:</label>
+        <select id="length">
+          <option value="short" selected>Short</option>
+          <option value="medium">Medium</option>
+          <option value="long">Long</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="format">Format:</label>
+        <select id="format">
+          <option value="markdown" selected>Markdown</option>
+          <option value="plain-text">Plain text</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Expected input languages:</span>
+        <div class="checkbox-group" id="expected-input-languages" role="group" aria-label="Expected input languages">
+          <label><input type="checkbox" name="input-lang" value="en"> English</label>
+          <label><input type="checkbox" name="input-lang" value="es"> Spanish</label>
+          <label><input type="checkbox" name="input-lang" value="ja"> Japanese</label>
+          <label><input type="checkbox" name="input-lang" value="et"> Estonian</label>
+        </div>
+      </div>
+      <div class="control-group">
+        <label for="output-language">Output language:</label>
+        <select id="output-language">
+          <option value="auto" selected>Auto-detect</option>
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="ja">Japanese</option>
+        </select>
+      </div>
+      <div class="control-group control-group-full">
+        <label for="shared-context">Shared context:</label>
+        <textarea id="shared-context" placeholder="Optional. e.g. This is a scientific article." rows="2"></textarea>
+      </div>
+    </fieldset>
+
+    <div class="output-container">
+      <h2>Summary</h2>
+      <pre id="output">Waiting for input...</pre>
+    </div>
+  </main>
+
+  <footer>
+    Testing Chrome Built-in AI. Ensure flags are enabled in chrome://flags.
+  </footer>
+
+  <!-- Error Dialogs -->
+  <div class="dialog" id="summarization-unavailable">
+    <div class="dialog-content error">
+      <strong>API Missing:</strong> Your browser doesn't support the
+      <code>window.Summarizer</code> API. Please use Chrome Canary and enable
+      the Summarization API flag.
+    </div>
+  </div>
+
+  <div class="dialog" id="summarization-unsupported">
+    <div class="dialog-content error">
+      <strong>Model Unavailable:</strong> The API is present, but the AI model
+      is not downloaded or supported on this device.
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
