@@ -102,6 +102,19 @@ select {
   margin-top: 0;
 }
 
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.75rem;
+}
+
+.stats span {
+  white-space: nowrap;
+}
+
 pre#output {
   background: var(--card-bg);
   padding: 1rem;
