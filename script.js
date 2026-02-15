@@ -10,6 +10,9 @@ const charCountEl = document.querySelector("#character-count");
 const unsupportedEl = document.querySelector("#summarization-unsupported");
 const unavailableEl = document.querySelector("#summarization-unavailable");
 const outputEl = document.querySelector("#output");
+const durationEl = document.querySelector("#duration");
+const inputStatsEl = document.querySelector("#input-stats");
+const throughputEl = document.querySelector("#throughput");
 
 let debounceTimer;
 
@@ -79,30 +82,34 @@ const generateSummary = async () => {
         }
 
         outputEl.textContent = "Generating summary...";
+        durationEl.textContent = "Duration: …";
+        inputStatsEl.textContent = "Input: … chars (… tokens)";
+        throughputEl.textContent = "Throughput: …";
 
         try {
             // 1. Create a session based on dropdowns
             const session = await createSession(typeEl.value, formatEl.value, lengthEl.value, getExpectedInputLanguages(), outputLanguageEl.value, sharedContextEl.value);
 
-            // 2. Measure usage (if supported by the implementation)
-            // Note: inputQuota is not always available in all versions of the API
-            /*
-               The original code used measureInputUsage.
-               We wrap in try/catch in case the specific API version differs.
-            */
-            try {
-               // Some versions of the API don't support measureInputUsage yet
-               // If it fails, we just skip the count update.
-            } catch (err) {
-               console.log("Measurement API not fully supported yet.");
-            }
+            // 2. Get token count from the browser's model tokenizer (measureInputUsage).
+            const tokenCount = await session.measureInputUsage(text);
+            const inputQuota = session.inputQuota;
+            const inputChars = text.length;
 
-            // 3. Generate Summary
-            // Some implementations use .summarize(), others use .prompt()
+            charCountEl.textContent = `${Math.round(tokenCount)} of ${inputQuota}`;
+
+            // 3. Generate Summary (with timing)
+            const startTime = performance.now();
             const result = await session.summarize(text);
+            const endTime = performance.now();
+            const durationSec = (endTime - startTime) / 1000;
 
             // 4. Update UI
             outputEl.textContent = result;
+            durationEl.textContent = `Duration: ${durationSec.toFixed(2)}s`;
+            inputStatsEl.textContent = `Input: ${inputChars} chars (${Math.round(tokenCount)} tokens)`;
+            throughputEl.textContent = tokenCount > 0 && durationSec > 0
+                ? `Throughput: ${(tokenCount / durationSec).toFixed(0)} tokens/s`
+                : "Throughput: —";
 
             // 5. Cleanup to free memory
             session.destroy();
@@ -110,6 +117,10 @@ const generateSummary = async () => {
         } catch (error) {
             console.error(error);
             outputEl.textContent = "Error generating summary: " + error.message;
+            charCountEl.textContent = "—";
+            durationEl.textContent = "Duration: —";
+            inputStatsEl.textContent = "Input: — chars (— tokens)";
+            throughputEl.textContent = "Throughput: —";
         }
 
     }, 800); // 800ms delay to stop running on every single keystroke
@@ -122,6 +133,7 @@ const init = async () => {
     // 1. Check if API exists in window
     if (self.Summarizer === undefined) {
         unavailableEl.style.display = "flex";
+        charCountEl.textContent = "—";
         return;
     }
 
@@ -129,6 +141,7 @@ const init = async () => {
     const isReady = await checkAvailability();
     if (!isReady) {
         unsupportedEl.style.display = "flex";
+        charCountEl.textContent = "—";
         return;
     }
 
